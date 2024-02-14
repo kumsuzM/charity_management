@@ -1,0 +1,39 @@
+version: "3.8"
+
+# TODO: Containerise frontend as well
+
+services:
+  server:
+    depends_on:
+      - db
+    build: ./backend
+    ports:
+      - 3000:3000
+    # establish docker compose watch mode for the api service
+    develop:
+      # specify the files to watch for changes
+      watch:
+        # it'll watch for changes in package.json and package-lock.json and rebuild the container and image if there are any changes.
+        # Basically if we add any new packages we should "rebuild", which essentially means we rebuild the image from the dockerfile.
+        # This is so node_modules can be reloaded and be up to date in the container
+        # This is rebuild basically runs `docker-compose up --rebuild` and so it rebuilds the image and
+        # resets the container
+        - path: ./backend/package.json
+          action: rebuild
+        - path: ./backend/package-lock.json
+          action: rebuild
+
+        # it'll watch for changes in the backend directory and sync the changes with the container real time
+        # After it is synced up, nodemon (which is running in container) will detect change and hot reload
+        - path: ./backend
+          target: /app
+          action: sync
+
+  db:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: password123
+      POSTGRES_USER: user123
+      POSTGRES_DB: charity_db
+# TODO: Use volumes to persist the data in the postgres db
+# rather than spinning up a new db instance everytime
