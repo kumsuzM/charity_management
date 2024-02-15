@@ -1,29 +1,29 @@
 version: "3.8"
 
-# TODO: Containerise frontend as well
-
 services:
+  # frontend service
   web:
-    build: ./frontend/charity-management-app
+    depends_on:
+      - server
+    build: ./frontend
     ports:
       - 5173:5173
-    volumes: 
-      - ./frontend/charity-management-app:/app
-      - /app/node_modules
+    environment:
+      VITE_API_URL: http://localhost:5173
+    # volumes: 
+    #   - ./frontend:/app
+    #   - /app/node_modules
     develop:
       # specify the files to watch for changes
       watch:
-        # it'll watch for changes in package.json and package-lock.json and rebuild the container and image if there are any changes.
-        # Basically if we add any new packages we should "rebuild", which essentially means we rebuild the image from the dockerfile.
-        # This is so node_modules can be reloaded and be up to date in the container
-        # This is rebuild basically runs `docker-compose up --rebuild` and so it rebuilds the image and
-        # resets the container
-        - path: ./frontend/charity-management-app/package.json
+        - path: ./frontend/package.json
+          action: rebuild
+        - path: ./frontend/package-lock.json
           action: rebuild
 
         # it'll watch for changes in the frontend directory and sync the changes with the container real time
         # After it is synced up, nodemon (which is running in container) will detect change and hot reload
-        - path: ./frontend/charity-management-app
+        - path: ./frontend
           target: /app
           action: sync
 
