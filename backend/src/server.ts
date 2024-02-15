@@ -14,7 +14,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.get("/hi", (_req: Request, res: Response) => {
-  res.send("TEST2" + return_hello());
+  res.send("TEST " + return_hello());
 });
 
 app.get("/team", async (req: Request, res: Response) => {
