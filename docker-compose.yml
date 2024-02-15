@@ -1,8 +1,32 @@
 version: "3.8"
 
-# TODO: Containerise frontend as well
-
 services:
+  # frontend service
+  web:
+    depends_on:
+      - server
+    build: ./frontend
+    ports:
+      - 5173:5173
+    environment:
+      VITE_API_URL: http://localhost:5173
+    # volumes: 
+    #   - ./frontend:/app
+    #   - /app/node_modules
+    develop:
+      # specify the files to watch for changes
+      watch:
+        - path: ./frontend/package.json
+          action: rebuild
+        - path: ./frontend/package-lock.json
+          action: rebuild
+
+        # it'll watch for changes in the frontend directory and sync the changes with the container real time
+        # After it is synced up, nodemon (which is running in container) will detect change and hot reload
+        - path: ./frontend
+          target: /app
+          action: sync
+
   server:
     depends_on:
       - db
