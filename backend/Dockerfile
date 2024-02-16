@@ -18,5 +18,5 @@ EXPOSE 3000
 # RUN npm run build
 
 # To launch up the container we run npm start which
-# runs node on th
+# uses nodemon to start server and restart on change
 CMD npm run dev

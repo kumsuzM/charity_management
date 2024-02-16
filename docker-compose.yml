@@ -56,5 +56,7 @@ services:
       POSTGRES_PASSWORD: password123
       POSTGRES_USER: user123
       POSTGRES_DB: charity_db
-# TODO: Use volumes to persist the data in the postgres db
-# rather than spinning up a new db instance everytime
+    volumes:
+      - ./init_db:/docker-entrypoint-initdb.d/
+    ports:
+      - "5432:5432"

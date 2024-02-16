@@ -1,5 +1,6 @@
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
+import cors from "cors";
 import { return_hello } from "./util";
 
 import pool from "./db";
@@ -9,22 +10,22 @@ dotenv.config();
 const app: Express = express();
 const port = process.env.EXPRESS_PORT || 3030;
 
+app.use(cors()); // This enables CORS for all routes
+
 app.get("/", (req: Request, res: Response) => {
   res.send("Express + TypeScript Server");
 });
 
-app.get("/hi", (_req: Request, res: Response) => {
-  res.send("TEST2" + return_hello());
-});
-
-app.get("/team", async (req: Request, res: Response) => {
-  // Here I am using postgres - but I am not using it from my local
-  // system - I am using it from a docker container :)
-  const result = await pool.query("SELECT $1::text as name", [
-    "SOFTWARESLOTHS",
-  ]);
-  const name = result.rows[0].name;
-  res.send(`Our team is ${name}!`);
+app.get("/charities", async (req: Request, res: Response) => {
+  try {
+    // Query the database for all charities
+    const { rows } = await pool.query("SELECT * FROM charities");
+    // Send the results back as JSON
+    res.json(rows);
+  } catch (error) {
+    console.error("Error querying the database:", error);
+    res.status(500).send("Internal Server Error: " + error);
+  }
 });
 
 app.listen(port, () => {
