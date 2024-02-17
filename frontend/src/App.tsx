@@ -1,5 +1,6 @@
-import Charities from "./Charities";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import Charities from './Charities';
 
 function App() {
   const queryClient = new QueryClient();
