@@ -1,33 +1,46 @@
 import express, { Express, Request, Response } from "express";
-import dotenv from "dotenv";
-import cors from "cors";
-import { return_hello } from "./util";
+import sponsorRoutes from "./routes/sponsorRoutes";
+import charityRoutes from "./routes/charityRoutes";
 
-import pool from "./db";
+import dotenv from "dotenv";
+import cors, { CorsOptions } from "cors";
 
 dotenv.config();
 
 const app: Express = express();
-const port = process.env.EXPRESS_PORT || 3030;
 
-app.use(cors()); // This enables CORS for all routes
+// built in middleware that parses incoming
+// json in request into req.body
+app.use(express.json());
+
+// Only allow our frontend vite dev server to access
+// this server (will have to change when deployed)
+const whitelist = ["http://localhost:5217"];
+
+// CORS options
+const corsOptions: CorsOptions = {
+  origin: function (origin, callback) {
+    // If the origin of the request is in our whitelist,
+    // then we let it pass
+    if (!origin || whitelist.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
+
+app.use("/sponsors", sponsorRoutes);
+app.use("/charities", charityRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Express + TypeScript Server");
 });
 
-app.get("/charities", async (req: Request, res: Response) => {
-  try {
-    // Query the database for all charities
-    const { rows } = await pool.query("SELECT * FROM charities");
-    // Send the results back as JSON
-    res.json(rows);
-  } catch (error) {
-    console.error("Error querying the database:", error);
-    res.status(500).send("Internal Server Error: " + error);
-  }
-});
-
-app.listen(port, () => {
-  console.log(`[server]: Server is running at http://localhost:${port}`);
+const PORT = process.env.EXPRESS_PORT || 3030;
+app.listen(PORT, () => {
+  console.log(`[server]: Server is running at http://localhost:${PORT}`);
 });
